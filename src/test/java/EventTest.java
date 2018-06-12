@@ -1,3 +1,6 @@
+import exception.CustomerAlreadyExistsException;
+import exception.EventSoldOutException;
+import model.Customer;
 import model.Event;
 import org.junit.Before;
 import org.junit.Test;
@@ -6,7 +9,6 @@ import service.EventManagementService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.*;
@@ -16,6 +18,9 @@ public class EventTest {
 	private static final LocalDateTime DEFAULT_DATE_AND_TIME = LocalDateTime.MIN;
 	private static final BigDecimal DEFAULT_TICKET_PRICE = BigDecimal.ONE;
 	private static final int DEFAULT_NUMBER_OF_SEATS = 100;
+
+	private static final String DEFAULT_NAME = "John Doe";
+	private static final String DEFAULT_ADDRESS = "1st Street, 99999 Sometown";
 
 	private EventManagementService eventManagementService;
 
@@ -52,9 +57,13 @@ public class EventTest {
 	}
 
 	@Test
-	public void testGetRemainingSeats() {
+	public void testGetRemainingSeats() throws CustomerAlreadyExistsException, EventSoldOutException {
 		Event event = eventManagementService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		eventManagementService.getRemainingSeats(event.getId());
+		int remainingSeats = eventManagementService.getRemainingSeats(event.getId());
+		eventManagementService.createReservation(event, customer, 2);
+
+		assertEquals(remainingSeats - 2, eventManagementService.getRemainingSeats(event.getId()));
 	}
 }

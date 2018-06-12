@@ -1,9 +1,10 @@
 package model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Event {
+public class Event implements Serializable {
 	private long id;
 	private String title;
 	private LocalDateTime dateAndTime;
@@ -11,8 +12,10 @@ public class Event {
 	private int numberOfSeats;
 	private int remainingSeats;
 
-	public Event(long id, String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
-		this.id = id;
+	private static int idCounter = 0;
+
+	public Event(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
+		this.id = idCounter++;
 		this.title = title;
 		this.dateAndTime = dateAndTime;
 		this.ticketPrice = ticketPrice;
@@ -22,10 +25,6 @@ public class Event {
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getTitle() {
@@ -62,5 +61,9 @@ public class Event {
 
 	public int getRemainingSeats() {
 		return remainingSeats;
+	}
+
+	public void reserveSeats(int amount) {
+		remainingSeats -= amount;
 	}
 }

@@ -1,14 +1,21 @@
 package factory;
 
 import model.Event;
+import persistence.EventRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class EventFactory {
-	private long eventCounter = 0;
+	private EventRepository repository;
 
-	public Event create(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
-		return new Event(eventCounter++, title, dateAndTime, ticketPrice, numberOfSeats);
+	public EventFactory(EventRepository repository) {
+		this.repository = repository;
+	}
+
+	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
+		Event event = new Event(title, dateAndTime, ticketPrice, numberOfSeats);
+		repository.save(event);
+		return event;
 	}
 }
