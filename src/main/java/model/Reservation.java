@@ -2,16 +2,13 @@ package model;
 
 import java.io.Serializable;
 
-public class Reservation implements Serializable {
+public final class Reservation implements Serializable {
 	private long id;
-	private long eventId;
-	private String customerName;
+	private final long eventId;
+	private final String customerName;
 	private int numberOfBookedTickets;
 
-	private static int idCounter = 0;
-
 	public Reservation(long eventId, String customerName, int numberOfBookedTickets) {
-		id = idCounter++;
 		this.eventId = eventId;
 		this.customerName = customerName;
 		this.numberOfBookedTickets = numberOfBookedTickets;
@@ -20,6 +17,8 @@ public class Reservation implements Serializable {
 	public long getId() {
 		return id;
 	}
+
+	public void setId(long id) { this.id = id; }
 
 	public long getEventId() {
 		return eventId;

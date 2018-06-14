@@ -2,9 +2,9 @@ package model;
 
 import java.io.Serializable;
 
-public class Customer implements Serializable {
-	private String name;
-	private String address;
+public final class Customer implements Serializable {
+	private final String name;
+	private final String address;
 
 	public Customer(String name, String address) {
 		this.name = name;
@@ -14,16 +14,7 @@ public class Customer implements Serializable {
 	public String getName() {
 		return name;
 	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getAddress() {
 		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
 	}
 }

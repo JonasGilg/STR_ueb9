@@ -2,7 +2,7 @@ import exception.CustomerAlreadyExistsException;
 import model.Customer;
 import org.junit.Before;
 import org.junit.Test;
-import service.EventManagementService;
+import service.CustomerService;
 
 import java.util.Collection;
 
@@ -15,16 +15,16 @@ public class CustomerTest {
 	private static final String DEFAULT_NAME_2 = "Jane Doe";
 	private static final String DEFAULT_ADDRESS = "1st Street, 99999 Sometown";
 
-	private EventManagementService eventManagementService;
+	private CustomerService customerService;
 
 	@Before
 	public void setUp() {
-		eventManagementService = new EventManagementService();
+		customerService = new CustomerService();
 	}
 
 	@Test
 	public void testCreate() throws CustomerAlreadyExistsException {
-		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
 		assertEquals(DEFAULT_NAME, customer.getName());
 		assertEquals(DEFAULT_ADDRESS, customer.getAddress());
@@ -32,16 +32,16 @@ public class CustomerTest {
 
 	@Test(expected = CustomerAlreadyExistsException.class)
 	public void testNameUniqueness() throws CustomerAlreadyExistsException {
-		eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
-		eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+		customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+		customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 	}
 
 	@Test
 	public void testGetAllCustomers() throws CustomerAlreadyExistsException {
-		Customer customer1 = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
-		Customer customer2 = eventManagementService.createCustomer(DEFAULT_NAME_2, DEFAULT_ADDRESS);
+		Customer customer1 = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+		Customer customer2 = customerService.createCustomer(DEFAULT_NAME_2, DEFAULT_ADDRESS);
 
-		Collection<Customer> customers = eventManagementService.getAllCustomers();
+		Collection<Customer> customers = customerService.getAllCustomers();
 		assertThat(customers, hasItems(customer1, customer2));
 	}
 }

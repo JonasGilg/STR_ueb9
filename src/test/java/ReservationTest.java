@@ -1,17 +1,25 @@
 import exception.CustomerAlreadyExistsException;
+import exception.CustomerBlacklistedException;
 import exception.EventSoldOutException;
 import model.Customer;
 import model.Event;
 import model.Reservation;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import service.EventManagementService;
+import org.mockito.Mockito;
+import service.BlackListService;
+import service.CustomerService;
+import service.EventService;
+import service.ReservationService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
+@SuppressWarnings("Duplicates")
 public class ReservationTest {
 	private static final String DEFAULT_TITLE = "Generic Title";
 	private static final LocalDateTime DEFAULT_DATE_AND_TIME = LocalDateTime.MIN;
@@ -21,31 +29,38 @@ public class ReservationTest {
 	private static final String DEFAULT_NAME = "John Doe";
 	private static final String DEFAULT_ADDRESS = "1st Street, 99999 Sometown";
 
-	private EventManagementService eventManagementService;
+	private ReservationService reservationService;
+	private EventService eventService;
+	private CustomerService customerService;
 
 	@Before
 	public void setUp() {
-		eventManagementService = new EventManagementService();
+		BlackListService blackListService = Mockito.mock(BlackListService.class);
+		when(blackListService.isBlacklisted(DEFAULT_NAME)).thenReturn(false);
+
+		reservationService = new ReservationService(blackListService);
+		eventService = new EventService();
+		customerService = new CustomerService();
 	}
 
 	@Test
-	public void testCreateTicketing() throws CustomerAlreadyExistsException, EventSoldOutException {
-		Event event = eventManagementService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+	public void testCreateTicketing() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		Reservation reservation = eventManagementService.createReservation(event, customer, 5);
+		Reservation reservation = reservationService.createReservation(event, customer, 5);
 		assertEquals(event.getId(), reservation.getEventId());
 		assertEquals(customer.getName(), reservation.getCustomerName());
 		assertEquals(5, reservation.getNumberOfBookedTickets());
 	}
 
 	@Test
-	public void testMultiReservation() throws CustomerAlreadyExistsException, EventSoldOutException {
-		Event event = eventManagementService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+	public void testMultiReservation() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		Reservation reservation1 = eventManagementService.createReservation(event, customer, 1);
-		Reservation reservation2 = eventManagementService.createReservation(event, customer, 2);
+		Reservation reservation1 = reservationService.createReservation(event, customer, 1);
+		Reservation reservation2 = reservationService.createReservation(event, customer, 2);
 
 		assertEquals(reservation1, reservation2);
 		assertEquals(reservation1.getId(), reservation2.getId());
@@ -57,13 +72,13 @@ public class ReservationTest {
 	}
 
 	@Test
-	public void testGetReservationFromCustomerAndEvent() throws CustomerAlreadyExistsException, EventSoldOutException {
-		Event event = eventManagementService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+	public void testGetReservationFromCustomerAndEvent() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		Reservation reservation1 = eventManagementService.createReservation(event, customer, 1);
+		Reservation reservation1 = reservationService.createReservation(event, customer, 1);
 
-		Reservation reservation2 = eventManagementService.getReservationTo(event, customer);
+		Reservation reservation2 = reservationService.getReservationTo(event, customer);
 
 		assertEquals(reservation1.getId(), reservation2.getId());
 		assertEquals(event.getId(), reservation2.getEventId());
@@ -71,10 +86,44 @@ public class ReservationTest {
 	}
 
 	@Test(expected = EventSoldOutException.class)
-	public void testFailCreateReservation() throws CustomerAlreadyExistsException, EventSoldOutException {
-		Event event = eventManagementService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Customer customer = eventManagementService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+	public void testFailCreateReservation() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		eventManagementService.createReservation(event, customer, 101);
+		reservationService.createReservation(event, customer, 101);
+	}
+
+	@Test(expected = CustomerBlacklistedException.class)
+	public void testReservationBlacklistFail() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
+		BlackListService blackListService = Mockito.mock(BlackListService.class);
+		ReservationService reservationService3 = new ReservationService(blackListService);
+
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+
+		Mockito.when(blackListService.isBlacklisted(DEFAULT_NAME)).thenReturn(true);
+
+		reservationService3.createReservation(event, customer, 20);
+
+		Mockito.verify(blackListService).isBlacklisted(DEFAULT_NAME);
+	}
+
+	@Test
+	public void testReservationBlacklistSucceed() throws CustomerAlreadyExistsException, EventSoldOutException {
+		BlackListService blackListService = Mockito.mock(BlackListService.class);
+		ReservationService reservationService3 = new ReservationService(blackListService);
+
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+
+		Mockito.when(blackListService.isBlacklisted(DEFAULT_NAME)).thenReturn(false);
+
+		try {
+			reservationService3.createReservation(event, customer, 20);
+		} catch (CustomerBlacklistedException e) {
+			Assert.fail();
+		}
+
+		Mockito.verify(blackListService).isBlacklisted(DEFAULT_NAME);
 	}
 }
