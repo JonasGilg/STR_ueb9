@@ -11,15 +11,8 @@ public final class Event implements Serializable {
 	private final BigDecimal ticketPrice;
 	private final int numberOfSeats;
 	private int remainingSeats;
-	private String email = "";
+	private String email;
 
-	public Event(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
-		this.title = title;
-		this.dateAndTime = dateAndTime;
-		this.ticketPrice = ticketPrice;
-		this.numberOfSeats = numberOfSeats;
-		this.remainingSeats = numberOfSeats;
-	}
 	public Event(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats, String email) {
 		this.title = title;
 		this.dateAndTime = dateAndTime;

@@ -24,42 +24,40 @@ public class EventTest {
 	private static final LocalDateTime DEFAULT_DATE_AND_TIME = LocalDateTime.MIN;
 	private static final BigDecimal DEFAULT_TICKET_PRICE = BigDecimal.ONE;
 	private static final int DEFAULT_NUMBER_OF_SEATS = 100;
+	private static final String DEFAULT_EMAIL_ADDRESS = "example@address.com";
 
 	private static final String DEFAULT_NAME = "John Doe";
 	private static final String DEFAULT_ADDRESS = "1st Street, 99999 Sometown";
+
+	private Event defaultEvent1;
+	private Event defaultEvent2;
 
 	private EventService eventService;
 
 	@Before
 	public void setUp() {
 		eventService = new EventService();
+		defaultEvent1 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS, DEFAULT_EMAIL_ADDRESS);
+		defaultEvent2 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS, DEFAULT_EMAIL_ADDRESS);
 	}
 
 	@Test
 	public void testCreation() {
-		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-
-		assertEquals(DEFAULT_TITLE, event.getTitle());
-		assertEquals(DEFAULT_DATE_AND_TIME, event.getDateAndTime());
-		assertEquals(DEFAULT_TICKET_PRICE, event.getTicketPrice());
-		assertEquals(DEFAULT_NUMBER_OF_SEATS, event.getNumberOfSeats());
+		assertEquals(DEFAULT_TITLE, defaultEvent1.getTitle());
+		assertEquals(DEFAULT_DATE_AND_TIME, defaultEvent1.getDateAndTime());
+		assertEquals(DEFAULT_TICKET_PRICE, defaultEvent1.getTicketPrice());
+		assertEquals(DEFAULT_NUMBER_OF_SEATS, defaultEvent1.getNumberOfSeats());
 	}
 
 	@Test
 	public void testIdUniqueness() {
-		Event event1 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Event event2 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-
-		assertNotEquals(event1.getId(), event2.getId());
+		assertNotEquals(defaultEvent1.getId(), defaultEvent2.getId());
 	}
 
 	@Test
 	public void testGetAllEvents() {
-		Event event1 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-		Event event2 = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
-
 		Collection<Event> events = eventService.getAllEvents();
-		assertThat(events, hasItems(event1, event2));
+		assertThat(events, hasItems(defaultEvent1, defaultEvent2));
 	}
 
 	@Test
@@ -71,12 +69,11 @@ public class EventTest {
 
 		ReservationService reservationService = new ReservationService(blackListService, null);
 
-		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
 		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
-		int remainingSeats = eventService.getRemainingSeats(event.getId());
-		reservationService.createReservation(event, customer, 2);
+		int remainingSeats = eventService.getRemainingSeats(defaultEvent1.getId());
+		reservationService.createReservation(defaultEvent1, customer, 2);
 
-		assertEquals(remainingSeats - 2, eventService.getRemainingSeats(event.getId()));
+		assertEquals(remainingSeats - 2, eventService.getRemainingSeats(defaultEvent1.getId()));
 	}
 }

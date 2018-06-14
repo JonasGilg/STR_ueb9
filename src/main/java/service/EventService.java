@@ -12,9 +12,6 @@ public class EventService {
 	private EventRepository eventRepository = new EventRepository();
 	private EventFactory eventFactory = new EventFactory(eventRepository);
 
-	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
-		return eventFactory.createEvent(title, dateAndTime, ticketPrice, numberOfSeats);
-	}
 	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats, String email) {
 		return eventFactory.createEvent(title, dateAndTime, ticketPrice, numberOfSeats, email);
 	}
@@ -27,11 +24,11 @@ public class EventService {
 		return eventRepository.find(id).getRemainingSeats();
 	}
 
-	public void saveToDisk(String path) {
+	void saveToDisk(String path) {
 		eventRepository.saveToDisk(path);
 	}
 
-	public void loadFromDisk(String path) {
+	void loadFromDisk(String path) {
 		eventRepository.loadFromDisk(path);
 	}
 }

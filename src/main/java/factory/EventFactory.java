@@ -13,12 +13,6 @@ public class EventFactory {
 		this.repository = repository;
 	}
 
-	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
-		Event event = new Event(title, dateAndTime, ticketPrice, numberOfSeats);
-		repository.save(event);
-		return event;
-	}
-
 	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats, String email) {
 		Event event = new Event(title, dateAndTime, ticketPrice, numberOfSeats, email);
 		repository.save(event);

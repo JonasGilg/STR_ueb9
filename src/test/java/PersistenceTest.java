@@ -23,6 +23,7 @@ public class PersistenceTest {
 	private static final LocalDateTime DEFAULT_DATE_AND_TIME = LocalDateTime.MIN;
 	private static final BigDecimal DEFAULT_TICKET_PRICE = BigDecimal.ONE;
 	private static final int DEFAULT_NUMBER_OF_SEATS = 100;
+	private static final String DEFAULT_EMAIL_ADDRESS = "example@address.com";
 
 	private static final String DEFAULT_NAME = "John Doe";
 	private static final String DEFAULT_ADDRESS = "1st Street, 99999 Sometown";
@@ -71,7 +72,7 @@ public class PersistenceTest {
 
 	@Test
 	public void testPersistence() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
-		Event event1 = eventService1.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
+		Event event1 = eventService1.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS, DEFAULT_EMAIL_ADDRESS);
 		Customer customer1 = customerService1.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
 
 		Reservation reservation1 = reservationService1.createReservation(event1, customer1, 2);
