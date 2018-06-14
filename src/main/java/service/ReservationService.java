@@ -13,15 +13,18 @@ public class ReservationService {
 	private ReservationFactory reservationFactory = new ReservationFactory(reservationRepository);
 
 	private BlackListService blackListService;
+	private EmailService emailService;
 
-	public ReservationService(BlackListService blackListService) {
+	public ReservationService(BlackListService blackListService, EmailService emailService) {
 		this.blackListService = blackListService;
+		this.emailService = emailService;
 	}
 
 	public Reservation createReservation(Event event, Customer customer, int amount) throws EventSoldOutException, CustomerBlacklistedException {
 		if(blackListService.isBlacklisted(customer.getName()))
 			throw new CustomerBlacklistedException();
-
+		if(amount >= event.getNumberOfSeats() / 10)
+			emailService.sendEmail(event.getEmail());
 		return reservationFactory.createReservation(event, customer, amount);
 	}
 

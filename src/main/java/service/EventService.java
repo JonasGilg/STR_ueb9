@@ -15,6 +15,9 @@ public class EventService {
 	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats) {
 		return eventFactory.createEvent(title, dateAndTime, ticketPrice, numberOfSeats);
 	}
+	public Event createEvent(String title, LocalDateTime dateAndTime, BigDecimal ticketPrice, int numberOfSeats, String email) {
+		return eventFactory.createEvent(title, dateAndTime, ticketPrice, numberOfSeats, email);
+	}
 
 	public Collection<Event> getAllEvents() {
 		return eventRepository.findAll();

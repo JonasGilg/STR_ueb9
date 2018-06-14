@@ -69,7 +69,7 @@ public class EventTest {
 		BlackListService blackListService = Mockito.mock(BlackListService.class);
 		when(blackListService.isBlacklisted(DEFAULT_NAME)).thenReturn(false);
 
-		ReservationService reservationService = new ReservationService(blackListService);
+		ReservationService reservationService = new ReservationService(blackListService, null);
 
 		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
 		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);

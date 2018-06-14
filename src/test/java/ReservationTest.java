@@ -8,15 +8,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import service.BlackListService;
-import service.CustomerService;
-import service.EventService;
-import service.ReservationService;
+import service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -32,13 +30,16 @@ public class ReservationTest {
 	private ReservationService reservationService;
 	private EventService eventService;
 	private CustomerService customerService;
+	private EmailService emailService;
 
 	@Before
 	public void setUp() {
 		BlackListService blackListService = Mockito.mock(BlackListService.class);
 		when(blackListService.isBlacklisted(DEFAULT_NAME)).thenReturn(false);
 
-		reservationService = new ReservationService(blackListService);
+
+		emailService = Mockito.mock(EmailService.class);
+		reservationService = new ReservationService(blackListService, emailService);
 		eventService = new EventService();
 		customerService = new CustomerService();
 	}
@@ -96,7 +97,7 @@ public class ReservationTest {
 	@Test(expected = CustomerBlacklistedException.class)
 	public void testReservationBlacklistFail() throws CustomerAlreadyExistsException, EventSoldOutException, CustomerBlacklistedException {
 		BlackListService blackListService = Mockito.mock(BlackListService.class);
-		ReservationService reservationService3 = new ReservationService(blackListService);
+		ReservationService reservationService3 = new ReservationService(blackListService, emailService);
 
 		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
 		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
@@ -111,7 +112,7 @@ public class ReservationTest {
 	@Test
 	public void testReservationBlacklistSucceed() throws CustomerAlreadyExistsException, EventSoldOutException {
 		BlackListService blackListService = Mockito.mock(BlackListService.class);
-		ReservationService reservationService3 = new ReservationService(blackListService);
+		ReservationService reservationService3 = new ReservationService(blackListService, emailService);
 
 		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS);
 		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
@@ -125,5 +126,16 @@ public class ReservationTest {
 		}
 
 		Mockito.verify(blackListService).isBlacklisted(DEFAULT_NAME);
+	}
+
+	@Test
+	public void testTenPercentEmailDelivery() throws CustomerAlreadyExistsException, CustomerBlacklistedException, EventSoldOutException {
+		Event event = eventService.createEvent(DEFAULT_TITLE, DEFAULT_DATE_AND_TIME, DEFAULT_TICKET_PRICE, DEFAULT_NUMBER_OF_SEATS, "example@address.com");
+		Customer customer = customerService.createCustomer(DEFAULT_NAME, DEFAULT_ADDRESS);
+
+		reservationService.createReservation(event, customer, event.getNumberOfSeats() / 10 + 1);
+
+		verify(emailService).sendEmail("example@address.com");
+
 	}
 }

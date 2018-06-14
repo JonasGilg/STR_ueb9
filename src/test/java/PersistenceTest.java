@@ -44,12 +44,12 @@ public class PersistenceTest {
 
 		eventService1 = new EventService();
 		customerService1 = new CustomerService();
-		reservationService1 = new ReservationService(blackListService);
+		reservationService1 = new ReservationService(blackListService,null);
 		persistenceService1 = new PersistenceService(eventService1, customerService1, reservationService1);
 
 		eventService2 = new EventService();
 		customerService2 = new CustomerService();
-		reservationService2 = new ReservationService(blackListService);
+		reservationService2 = new ReservationService(blackListService, null);
 		persistenceService2 = new PersistenceService(eventService2, customerService2, reservationService2);
 	}
 
